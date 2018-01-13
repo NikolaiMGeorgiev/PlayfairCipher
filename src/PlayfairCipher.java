@@ -7,10 +7,7 @@ public class PlayfairCipher {
         String key = input.nextLine().toUpperCase();
 
         //проверка за коректност на входните данни
-        while (!isCorrectEntry(key)) {
-            System.out.println("Incorrect entry! Please use only letters.");
-            key = new Scanner(System.in).nextLine().toUpperCase();
-        }
+        key = correctEntry(key);
 
         char[] alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
         char[] keyLetters = key.replaceAll("\\s+", "").toCharArray();
@@ -19,7 +16,6 @@ public class PlayfairCipher {
         /* задаваме като начална стойност на използваните букви една буква,
         за да поберем 26 цифрената азбука в 25 полета */
         String usedLetters = skippedLetter(key);
-        System.out.println("usedLetters=" + usedLetters);
 
         byte currentLetter = 0;
         byte alphabetLetter = 0;
@@ -51,60 +47,47 @@ public class PlayfairCipher {
         System.out.print("Enter the message to encrypt: ");
         String messageText = input.nextLine().toUpperCase();
 
-        while (!isCorrectEntry(messageText)) {
-            System.out.println("Incorrect entry! Please use only letters.");
-            messageText = new Scanner(System.in).nextLine().toUpperCase();
-        }
+        //проверка за коректност на входните данни
+        messageText = correctEntry(messageText);
 
-        char[] message = messageText.replaceAll("\\s+", "").toCharArray();
-        int counter = 0;
-        int[] xIndexes = new int[message.length];
+        messageText = insertX(messageText.replaceAll("\\s+", ""));
 
-        /* намеране на броя на двойките, съставени от 2 еднакви букви,
-        и запаметяване на техните позиции в отделен масив xIndexes */
-        for (int i = 1; i < message.length; i += 2) {
-            if (message[i] == message[i - 1]) {
-                xIndexes[counter] = i;
-                counter++;
-                i--;
-            }
-        }
+        //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //!!!!probvai pri kodiraneto da polzvash naparavo messageText vmesto diagram!!!!
 
-        //разделяне на съобщението на групи от по 2 букви
-        int diagramLength = message.length / 2 + counter;
+        int diagramLength = messageText.length() / 2;
         char[][] diagram = new char[diagramLength][2];
-        int index = 0;
-        int group = 0;
-        for (int i = 1; i < message.length; i += 2) {
-            //разделяне на двойка еднакви букви ог една група на 2 отделни групи чрез Х
-            if (i == xIndexes[index]) {
-                diagram[group][0] = message[i - 1];
-                diagram[group][1] = 'X';
-                group++;
-                i++;
-                index++;
-            }
-            diagram[group][0] = message[i - 1];
-            diagram[group][1] = message[i];
-            group++;
-        }
-
-        if ((message.length + counter) % 2 != 0) {
-            diagram[diagramLength - 1][0] = message[message.length - 1];
-            diagram[diagramLength - 1][1] = 'X';
-        }
-
+        int letter = 0;
         for (int i = 0; i < diagram.length; i++) {
             for (int j = 0; j < 2; j++) {
+                diagram[i][j] = messageText.charAt(letter);
                 System.out.print(diagram[i][j] + " ");
+                letter++;
             }
             System.out.println();
         }
+
     }
 
-    public static boolean isCorrectEntry(String entry) {
-        //проверява дали String-а се състои от букви и интервал, но не и само от интервал
-        return entry.matches("^[ A-Za-z]+$") && entry.trim().length() > 0;
+    public static String insertX(String message) {
+        StringBuilder text = new StringBuilder(message);
+        for (int i = 1; i < text.length(); i += 2) {
+            if (text.charAt(i) == text.charAt(i - 1)) {
+                text.insert(i, "X");
+            }
+        }
+        if (text.length() % 2 != 0) {
+            text.append("X");
+        }
+        return text.toString();
+    }
+
+    public static String correctEntry(String message) {
+        while (!message.matches("^[ A-Za-z]+$") || message.trim().length() <= 0) {
+            System.out.println("Incorrect entry! Please use only letters.");
+            message = new Scanner(System.in).nextLine().toUpperCase();
+        }
+        return message;
     }
 
     public static boolean isNewLetter(char letter, String usedLetters) {
