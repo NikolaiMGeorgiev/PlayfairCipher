@@ -58,39 +58,67 @@ public class PlayfairCipher {
     }
 
     public static String encodeMessage(char[][] diagram, char[][] table) {
+        int letter1Row;
+        int letter2Row;
+        int letter1Col;
+        int letter2Col;
+        int position;
         StringBuilder encriptedMessage = new StringBuilder();
         for (int i = 0; i < diagram.length; i++) {
-            encriptedMessage.append(encodeGroup(diagram[i][0], diagram[i][1], table));
+            position = getPositionInTable(diagram[i][0], table);
+            letter1Row = position / 10;
+            letter1Col = position % 10;
+            position=getPositionInTable(diagram[i][1],table);
+            letter2Row=position/10;
+            letter2Col=position%10;
+            encriptedMessage.append(getNewLetters(letter1Row, letter2Row, letter1Col, letter2Col, table));
         }
         return encriptedMessage.toString();
     }
 
-    public static String encodeGroup(char firstLetter, char secondLetter, char[][] table) {
-        int[][] indexRow = new int[1][2];
-        int[][] indexCol = new int[1][2];
-        boolean isFirstFound = false;
-        boolean isSecondFound = false;
+    public static int getPositionInTable(char letter, char[][] table) {
         for (int i = 0; i < table.length; i++) {
             for (int j = 0; j < table.length; j++) {
-                if (table[i][j] == firstLetter) {
-                    indexRow[0][0] = i;
-                    indexCol[0][0] = j;
-                    isFirstFound = true;
-                } else if (table[i][j] == secondLetter) {
-                    indexRow[0][1] = i;
-                    indexCol[0][1] = j;
-                    isSecondFound = true;
+                if (table[i][j] == letter) {
+                    return i * 10 + j;
                 }
             }
-            if (isFirstFound && isSecondFound) {
-                break;
-            }
         }
-        //!!!!razdeli na dva metoda!!!!!
-        if (indexRow[0][0]!=indexRow[0][1]){
-            if(indexCol[0][0]!=indexCol[0][1]){
+        return 0;
+    }
 
+    public static String getNewLetters(int rowLetter1, int rowLetter2,
+                                       int colLetter1, int colLetter2, char[][] table) {
+        if (rowLetter1 != rowLetter2) {
+            if (colLetter1 != colLetter2) {
+                return table[colLetter1][colLetter2] + "" + table[rowLetter2][colLetter1];
+            } else {
+                return sameColumnCase(rowLetter1, colLetter1, table)
+                        + sameColumnCase(rowLetter2, colLetter2, table);
             }
+        } else {
+            return sameRowCase(rowLetter1, colLetter1, table)
+                    + sameRowCase(rowLetter2, colLetter2, table);
+        }
+    }
+
+    public static String sameColumnCase(int rowLetter, int colLetter, char[][] table) {
+        if (rowLetter == 5 && colLetter == 5) {
+            return table[0][0] + "";
+        } else if (rowLetter + 1 > 5) {
+            return table[0][colLetter + 1] + "";
+        } else {
+            return table[rowLetter + 1][colLetter] + "";
+        }
+    }
+
+    public static String sameRowCase(int rowLetter, int colLetter, char[][] table) {
+        if (rowLetter == 5 && colLetter == 5) {
+            return table[0][0] + "";
+        } else if (colLetter + 1 > 5) {
+            return table[rowLetter + 1][0] + "";
+        } else {
+            return table[rowLetter][colLetter + 1] + "";
         }
     }
 
